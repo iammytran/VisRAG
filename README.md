@@ -347,10 +347,10 @@ For `VisRAG-Gen`, you can explore the `VisRAG Pipeline` on Google Colab which in
 
 # 📈 Star History
 
-<a href="https://star-history.com/#openbmb/VisRAG&Date">
+<a href="https://www.star-history.com/?repos=openbmb%2Fvisrag&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=openbmb/VisRAG&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=openbmb/VisRAG&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=openbmb/VisRAG&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=openbmb/visrag&type=date&theme=dark&legend=top-left&sealed_token=sJEZ3AVVm37gyh3LXj5xTipdkf0N9LvvdFP6NzI3iVIh8bG1JcoR0KnwE7Ul6-4Qu0KBRN_Ns4nR-JX2AmdFTr29hkLCBZ6jhm2oOiYaerzkR9Nvcn8ruQ" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=openbmb/visrag&type=date&legend=top-left&sealed_token=sJEZ3AVVm37gyh3LXj5xTipdkf0N9LvvdFP6NzI3iVIh8bG1JcoR0KnwE7Ul6-4Qu0KBRN_Ns4nR-JX2AmdFTr29hkLCBZ6jhm2oOiYaerzkR9Nvcn8ruQ" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=openbmb/visrag&type=date&legend=top-left&sealed_token=sJEZ3AVVm37gyh3LXj5xTipdkf0N9LvvdFP6NzI3iVIh8bG1JcoR0KnwE7Ul6-4Qu0KBRN_Ns4nR-JX2AmdFTr29hkLCBZ6jhm2oOiYaerzkR9Nvcn8ruQ" />
  </picture>
 </a>
