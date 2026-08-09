@@ -36,6 +36,7 @@
 
 # 🎉 News
 
+* 20260709: Our work EVisRAG is accepted by ACM MM 2026 🎉.
 * 20251207: Released all [benchmarks](https://huggingface.co/collections/openbmb/visrag) on HuggingFace.
 * 20251118: Both EVisRAG and VisRAG can be easily reproduced within [UltraRAG v2](https://github.com/OpenBMB/UltraRAG).
 * 20251022: We upload all evaluation benchmarks in [VisRAG Collections](https://huggingface.co/collections/openbmb/visrag-6717bbfb471bb018a49f1c69) 
