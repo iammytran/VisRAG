@@ -175,3 +175,5 @@ kb/
 .DS_Store
 
 /VisRAG-Ret
+
+artifacts/

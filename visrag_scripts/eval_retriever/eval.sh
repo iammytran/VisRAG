@@ -34,7 +34,7 @@ do
     THIS_RESULT_DIR="$RESULT_DIR/$SUB_DATASET"
     echo "This dataset result dir: $THIS_RESULT_DIR"
 
-    CORPUS_PATH="openbmb/VisRAG-Ret-Test-${SUB_DATASET}"
+    CORPUS_PATH="artifacts/InfoVQA/datasets/fragment_corpus.parquet"
     QUERY_PATH="openbmb/VisRAG-Ret-Test-${SUB_DATASET}"
     QRELS_PATH="openbmb/VisRAG-Ret-Test-${SUB_DATASET}"
 

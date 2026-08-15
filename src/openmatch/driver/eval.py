@@ -217,8 +217,10 @@ def retrieve(data_args, encoding_args):
     # save trec file
     if encoding_args.trec_save_path is None:
         encoding_args.trec_save_path = os.path.join(encoding_args.output_dir, f"test.{encoding_args.process_index}.trec")
+
+    processed_run = process_run(run)
     
-    save_as_trec(run, encoding_args.trec_save_path)
+    save_as_trec(processed_run, encoding_args.trec_save_path)
 
     if encoding_args.world_size > 1:
         torch.distributed.barrier()
@@ -231,6 +233,21 @@ def retrieve(data_args, encoding_args):
     if encoding_args.world_size > 1:
         torch.distributed.barrier()
 
+def process_run(run):
+    new_run = {}
+
+    for qid, docs in run.items():
+        new_docs = {}
+        for doc_id, score in docs.items():
+            # Lấy phần ID trước dấu gạch dưới đầu tiên
+            clean_id = doc_id.split("_")[0]
+            
+            # Giữ score cao nhất nếu có nhiều patch trùng ID gốc
+            if clean_id not in new_docs or score > new_docs[clean_id]:
+                new_docs[clean_id] = score
+                
+    new_run[qid] = new_docs
+    return new_run
 
 def setup_file(path_from_hf_repo, path):
     if ( path_from_hf_repo):
