@@ -189,7 +189,7 @@ def encode_corpus(data_args, encoding_args, tokenizer, model):
         cache_dir=data_args.data_cache_dir,
         filter_fn=None,
         content='corpus',
-        from_hf_repo=data_args.from_hf_repo
+        from_hf_repo=False
     )
     
     logger.info("Encoding corpus")
