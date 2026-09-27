@@ -25,7 +25,7 @@ def images_to_base64_list(image_list):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_name', type=str, required=True, choices=['MiniCPM', 'MiniCPMV2.0', 'MiniCPMV2.6', 'gpt4o'])
+    parser.add_argument('--model_name', type=str, required=True, choices=['MiniCPM', 'MiniCPMV2.0', 'MiniCPMV2.6', 'Qwen2.5-VL-7B-Instruct', 'gpt4o'])
     parser.add_argument('--model_name_or_path', type=str, required=True)
     parser.add_argument('--dataset_name', type=str, choices=['ArxivQA', 'ChartQA', 'PlotQA', 'MP-DocVQA', 'SlideVQA', 'InfoVQA'], required=True)
     parser.add_argument('--dataset_name_or_path', type=str, required=False)
@@ -104,7 +104,10 @@ def main():
                     continue
                 
             else:
-                responds, _ = model.chat(tokenizer, input, temperature=0.8, top_p=0.8, max_new_tokens=max_new_tokens)
+                if args.model_name == 'Qwen2.5-VL-7B-Instruct':
+                    responds = get_responds_text_qwen(model, tokenizer, input, [], max_new_tokens)
+                else:
+                    responds, _ = model.chat(tokenizer, input, temperature=0.8, top_p=0.8, max_new_tokens=max_new_tokens)
                     
         else:
             image_list = [corpus[docid_item] for docid_item in docid]
@@ -125,6 +128,8 @@ def main():
                 responds = get_responds_image_gpt(client, input, image_list, max_new_tokens)
                 if responds == None:
                     continue
+            elif args.model_name == 'Qwen2.5-VL-7B-Instruct':
+                responds = get_responds_image_qwen(model, tokenizer, input, image_list, max_new_tokens)
             else:
                 responds = get_responds_image(args, model, input, tokenizer, image_list, max_new_tokens)
             
@@ -214,6 +219,8 @@ def check_args(args):
                 raise Exception("concatenate_type error: concatenate_type can only be 'horizontal' or 'vertical'.")
     if args.model_name == 'gpt4o' and args.openai_api_key == None:
         raise Exception("Model is gpt4o but openai_api_key is None! Please write your OpenAI API key in openai_api_key argument.")
+    if args.model_name == 'Qwen2.5-VL-7B-Instruct' and args.task_type == 'weighted_selection':
+        raise Exception("Qwen2.5-VL-7B-Instruct does not support weighted_selection; use multi_image or page_concatenation.")
     
     if args.model_name != 'gpt4o' and args.model_name_or_path == None:
         raise Exception("model_name_or_path is None: please provide model path in model_name_or_path argument")
@@ -239,6 +246,17 @@ def load_corpus(args):
 
 def load_model_and_tokenizer(args):
     #加载模型
+    if args.model_name == 'Qwen2.5-VL-7B-Instruct':
+        from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
+
+        processor = AutoProcessor.from_pretrained(args.model_name_or_path)
+        model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+            args.model_name_or_path,
+            torch_dtype=torch.bfloat16,
+        )
+        model = model.eval().to(args.rank)
+        return model, processor
+
     if (args.task_type == 'weighted_selection'):
         if (args.model_name == 'MiniCPMV2.0'):
             from openmatch.modeling.weighted_selection.MiniCPMV20.modeling_minicpmv import MiniCPMV as ModelForCausalLM_class
@@ -440,6 +458,33 @@ def get_responds_image(args, model, input, tokenizer, image_list, max_new_tokens
                 max_new_tokens=max_new_tokens
             )
     return responds       
+
+
+def get_responds_text_qwen(model, processor, prompt, image_list, max_new_tokens):
+    return get_responds_qwen(model, processor, prompt, image_list, max_new_tokens)
+
+
+def get_responds_image_qwen(model, processor, input, image_list, max_new_tokens):
+    return get_responds_qwen(model, processor, input[0]['content'], image_list, max_new_tokens)
+
+
+def get_responds_qwen(model, processor, prompt, image_list, max_new_tokens):
+    content = [{'type': 'image', 'image': image} for image in image_list]
+    content.append({'type': 'text', 'text': prompt})
+    messages = [{'role': 'user', 'content': content}]
+    text = processor.apply_chat_template(
+        messages, tokenize=False, add_generation_prompt=True
+    )
+    inputs = processor(
+        text=[text],
+        images=image_list if image_list else None,
+        padding=True,
+        return_tensors='pt',
+    )
+    inputs = {key: value.to(model.device) for key, value in inputs.items()}
+    generated_ids = model.generate(**inputs, max_new_tokens=max_new_tokens)
+    generated_ids = generated_ids[:, inputs['input_ids'].shape[1]:]
+    return processor.batch_decode(generated_ids, skip_special_tokens=True)[0].strip()
 
 
 def get_responds_image_weighted_selection(model, input, image_list, doc_scores, tokenizer, max_new_tokens):
