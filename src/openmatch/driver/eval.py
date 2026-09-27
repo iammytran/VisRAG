@@ -278,20 +278,17 @@ def save_results(encoding_args, qrels):
         print("loading", part)
         run.update(load_from_trec(part))
     
-    evaluator = pytrec_eval.RelevanceEvaluator(
-        qrels, {"ndcg_cut.10", "recall.10"})
+    evaluator = pytrec_eval.RelevanceEvaluator(qrels, {"recall.3"})
     eval_results = evaluator.evaluate(run)
 
-    def print_line(measure, scope, value):
-        print("{:25s}{:8s}{:.4f}".format(measure, scope, value))
-        with open(
-            os.path.join(encoding_args.output_dir, "test_result.log"), "w", encoding="utf-8"
-        ) as fw:
-            fw.write("{:25s}{:8s}{:.4f}\n".format(measure, scope, value))
-    
-    query_id, query_measures = sorted(eval_results.items())[-1]
+    result_lines = []
 
-    for measure in sorted(query_measures.keys()):
+    def print_line(measure, scope, value):
+        line = "{:25s}{:8s}{:.4f}".format(measure, scope, value)
+        result_lines.append(line)
+        print("{:25s}{:8s}{:.4f}".format(measure, scope, value))
+    
+    for measure in sorted(next(iter(eval_results.values())).keys()):
         print_line(
             measure,
             "all",
@@ -301,7 +298,12 @@ def save_results(encoding_args, qrels):
         )
                     
     mrr_at_10 = eval_mrr(qrels, run, 10)['all']
-    print(f'MRR@10: {mrr_at_10}')
+    print_line("MRR@10", "all", mrr_at_10)
+
+    with open(
+        os.path.join(encoding_args.output_dir, "test_result.log"), "w", encoding="utf-8"
+    ) as fw:
+        fw.write("\n".join(result_lines) + "\n")
 
 
 def get_model_name(model_args):
