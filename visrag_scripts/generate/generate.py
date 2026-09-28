@@ -40,6 +40,8 @@ def parse_args():
     parser.add_argument('--task_type', type=str, required=True, choices=['text', 'page_concatenation', 'weighted_selection', 'multi_image'])
     parser.add_argument('--concatenate_type', type=str, choices=['horizontal', 'vertical'])
     parser.add_argument('--openai_api_key', type=str, help='api key for open_ai, required only if --model_name == gpt4o')
+    parser.add_argument('--min_pixels', type=int, default=256 * 28 * 28)
+    parser.add_argument('--max_pixels', type=int, default=1024 * 28 * 28)
     args = parser.parse_args()
     return args
 
@@ -129,7 +131,9 @@ def main():
                 if responds == None:
                     continue
             elif args.model_name == 'Qwen2.5-VL-7B-Instruct':
-                responds = get_responds_image_qwen(model, tokenizer, input, image_list, max_new_tokens)
+                responds = get_responds_image_qwen(
+                    model, tokenizer, input, image_list, max_new_tokens
+                )
             else:
                 responds = get_responds_image(args, model, input, tokenizer, image_list, max_new_tokens)
             
@@ -249,7 +253,11 @@ def load_model_and_tokenizer(args):
     if args.model_name == 'Qwen2.5-VL-7B-Instruct':
         from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
 
-        processor = AutoProcessor.from_pretrained(args.model_name_or_path)
+        processor = AutoProcessor.from_pretrained(
+            args.model_name_or_path,
+            min_pixels=args.min_pixels,
+            max_pixels=args.max_pixels,
+        )
         model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
             args.model_name_or_path,
             torch_dtype=torch.bfloat16,
